@@ -1,0 +1,27 @@
+# dependencies
+node_modules
+/.pnp
+.pnp.js
+
+# build artifacts
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+
+# env (never commit secrets; .env.local has the R2 base URL which is public,
+# but keep it out of the repo so prod values can differ per environment).
+.env
+.env.local
+.env.*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Portfolio media — this folder is a Windows junction to the studio's
+# multi-gigabyte source library. The deployed site fetches media from R2
+# via NEXT_PUBLIC_MEDIA_BASE; the local files are only used at build time
+# to enumerate works on the host running `next build`.
+/public/portfolio
