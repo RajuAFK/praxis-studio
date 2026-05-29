@@ -1,0 +1,257 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vault-ember: #d96a2a;
+  --vault-bg: #000000;
+  --vault-paper: #f4ece1;
+  --vault-paper-dim: rgba(244, 236, 225, 0.55);
+  --vault-rule: rgba(244, 236, 225, 0.18);
+  --vault-reticle-display: block;
+  --vault-line-scale: 1;
+  --vault-live-animation: vault-pulse 2s infinite;
+}
+
+html,
+body {
+  background: var(--vault-bg);
+  color: var(--vault-paper);
+  font-family: var(--font-display), "Times New Roman", serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- PLATE: hover reveal ---------- */
+.vault-plate {
+  position: relative;
+  overflow: hidden;
+}
+.vault-plate > :first-child {
+  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    filter 600ms ease;
+}
+.vault-plate:hover > :first-child {
+  transform: scale(1.025);
+  filter: contrast(1.08) brightness(1.04);
+}
+.vault-plate-meta {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--vault-paper);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 500ms ease 80ms,
+    transform 500ms cubic-bezier(0.2, 0.7, 0.3, 1) 80ms;
+  pointer-events: none;
+}
+.vault-plate:hover .vault-plate-meta,
+.vault-plate:focus-within .vault-plate-meta {
+  opacity: 1;
+  transform: translateY(0);
+}
+.vault-plate-reticle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  transition: opacity 380ms ease;
+  pointer-events: none;
+  display: var(--vault-reticle-display);
+}
+.vault-plate:hover .vault-plate-reticle {
+  opacity: 0.95;
+}
+.vault-plate-reticle::before,
+.vault-plate-reticle::after {
+  content: "";
+  position: absolute;
+  background: var(--vault-ember);
+}
+.vault-plate-reticle::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+.vault-plate-reticle::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+.vault-plate-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--vault-ember);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  pointer-events: none;
+}
+.vault-plate:hover .vault-plate-line {
+  transform: scaleX(var(--vault-line-scale));
+}
+
+/* ---------- ROW: index hover ---------- */
+.vault-row {
+  transition: background 300ms ease;
+  position: relative;
+}
+.vault-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--vault-ember);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 600ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.vault-row:hover {
+  background: rgba(217, 106, 42, 0.04);
+}
+.vault-row:hover::after {
+  transform: scaleX(1);
+}
+.vault-row .vault-row-num,
+.vault-row .vault-row-title {
+  transition: color 300ms ease, transform 500ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.vault-row:hover .vault-row-num {
+  color: var(--vault-ember);
+}
+.vault-row:hover .vault-row-title {
+  transform: translateX(8px);
+}
+
+/* ---------- LINK: animated underline ---------- */
+.vault-link {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  padding-bottom: 4px;
+  background-image: linear-gradient(
+    var(--vault-ember),
+    var(--vault-ember)
+  );
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: background-size 480ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    color 240ms ease;
+}
+.vault-link:hover,
+.vault-link[data-active="true"] {
+  color: var(--vault-ember);
+  background-size: 100% 1px;
+}
+
+/* ---------- LIVE indicator dot ---------- */
+@keyframes vault-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.vault-live {
+  animation: var(--vault-live-animation);
+}
+
+/* ---------- Reveal ---------- */
+@keyframes vault-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.vault-reveal {
+  animation: vault-fade-up 1200ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* ---------- Responsive section padding helper ---------- */
+.vault-pad {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+@media (min-width: 640px) {
+  .vault-pad {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+@media (min-width: 1024px) {
+  .vault-pad {
+    padding-left: 56px;
+    padding-right: 56px;
+  }
+}
+@media (min-width: 1280px) {
+  .vault-pad {
+    padding-left: 80px;
+    padding-right: 80px;
+  }
+}
+
+/* Fluid headline scaling — used for the giant editorial heads */
+.h-display-xl {
+  font-size: clamp(56px, 13vw, 172px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 300;
+}
+.h-display-l {
+  font-size: clamp(48px, 10vw, 148px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 300;
+}
+.h-display-m {
+  font-size: clamp(40px, 7vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 300;
+}
+.h-display-s {
+  font-size: clamp(34px, 5.5vw, 64px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-weight: 300;
+}
+.h-display-xs {
+  font-size: clamp(28px, 4.2vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  font-weight: 300;
+}
+
+/* Hide horizontal overflow on the whole site (long titles, etc) */
+html,
+body {
+  overflow-x: hidden;
+}
