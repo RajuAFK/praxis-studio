@@ -7,7 +7,7 @@
     "build": "next build && node scripts/post-build.mjs",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build && gh-pages -d out -b deploy -t -f -m \"Deploy: $(date +%Y-%m-%d_%H%M)\""
+    "deploy": "npm run build && node -e \"require('fs').copyFileSync('public/.htaccess','out/.htaccess')\" && gh-pages -d out -b deploy -t"
   },
   "dependencies": {
     "next": "15.0.4",
