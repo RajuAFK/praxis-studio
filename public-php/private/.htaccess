@@ -1,0 +1,28 @@
+# Rewrite /private/{slug}/ → index.php?slug={slug}
+RewriteEngine On
+
+# Allow direct hits to the api endpoints + static assets to fall through.
+RewriteCond %{REQUEST_URI} ^/private/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/private/private\.css$
+RewriteRule .* - [L]
+
+# /private/<slug>/ → index.php?slug=<slug>
+RewriteRule ^([a-z0-9-]{1,120})/?$ index.php?slug=$1 [L,QSA]
+
+# /private/ alone → 404
+RewriteRule ^$ - [R=404,L]
+
+# Strong security headers + no caching for the gated content
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  Header set Pragma "no-cache"
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set Referrer-Policy "same-origin"
+</IfModule>
+
+# Hide PHP includes from direct web access
+<FilesMatch "(config-bridge\.php|^_pp\.php)$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 /private/lib/.*

@@ -26,6 +26,8 @@ on:
       - "tsconfig.json"
       - "postcss.config.js"
       - "tailwind.config.ts"
+      - "public-php/**"
+      - ".github/workflows/cms-rebuild.yml"
 
 concurrency:
   group: cms-rebuild
@@ -55,11 +57,37 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      # Refresh the portfolio manifest from R2 (read-only credentials).
+      # Falls back to the committed manifest if R2_* secrets aren't set.
+      # The manifest is what lib/portfolio.ts reads when the local junction
+      # is missing — i.e. every CI build.
+      - name: Refresh portfolio manifest from R2
+        env:
+          R2_ACCOUNT_ID:  ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET:      ${{ secrets.R2_BUCKET }}
+          R2_LIST_KEY:    ${{ secrets.R2_LIST_KEY }}
+          R2_LIST_SECRET: ${{ secrets.R2_LIST_SECRET }}
+        run: |
+          if [ -n "$R2_ACCOUNT_ID" ] && [ -n "$R2_LIST_KEY" ]; then
+            npm run manifest -- --r2
+          else
+            echo "R2 secrets not set — using committed manifest"
+          fi
+
       - name: Build (static export)
         run: npm run build
 
       - name: Copy .htaccess into out/
         run: cp public/.htaccess out/.htaccess
+
+      # Copy public PHP (private-pages gate, unlock + get APIs) into out/.
+      # These files coexist with the Next.js static export on the same
+      # webroot — Apache picks the right handler per URL.
+      - name: Copy public-php into out/
+        run: |
+          if [ -d public-php ]; then
+            cp -r public-php/. out/
+          fi
 
       - name: Publish out/ to deploy branch
         env:

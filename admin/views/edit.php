@@ -113,6 +113,12 @@ $currentStatus = $s['status'] ?? 'draft';
     <div class="field">
       <label>Upload <span class="muted">(replaces existing; JPG/PNG/WebP, max 25 MB)</span></label>
       <input type="file" name="hero_image" accept="image/jpeg,image/png,image/webp">
+      <div style="margin-top: 6px;">
+        <button type="button" class="btn secondary cs-pick-archive" data-target="hero_existing_src" style="padding: 4px 10px; font-size: 12px;">
+          Pick from archive →
+        </button>
+        <span class="muted" id="hero-pick-status" style="font-size: 12px; margin-left: 8px;"></span>
+      </div>
     </div>
     <div class="grid-2">
       <div class="field">
@@ -226,6 +232,12 @@ $currentStatus = $s['status'] ?? 'draft';
           <input type="file"  name="plate_image[]"    accept="image/jpeg,image/png,image/webp">
           <button type="button" class="btn secondary" onclick="this.closest('.rowset').remove()">−</button>
         </div>
+        <div style="margin-top: 4px;">
+          <button type="button" class="btn secondary cs-pick-archive" data-target="plate" data-idx="<?= $i ?>" style="padding: 4px 10px; font-size: 12px;">
+            Pick from archive →
+          </button>
+          <span class="muted plate-pick-status" style="font-size: 12px; margin-left: 8px;"></span>
+        </div>
       </div>
     <?php endforeach; ?>
   </div>
@@ -277,7 +289,42 @@ $currentStatus = $s['status'] ?? 'draft';
   </p>
 </form>
 
+<script src="/admin/assets/library.js"></script>
 <script>
+// "Pick from archive" — works for any button with data-target = name of the hidden field.
+// For the hero, target is "hero_existing_src". For plates, we wire it dynamically since the
+// hidden fields are array-indexed.
+(function () {
+  const slug = <?= json_encode($s['slug'] ?? '') ?>;
+  document.querySelectorAll('.cs-pick-archive').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      const idx    = btn.dataset.idx;
+      PPAdmin.openPicker({
+        slug,
+        onPick: (url) => {
+          if (target === 'hero_existing_src') {
+            let h = document.querySelector('input[name="hero_existing_src"]');
+            if (!h) {
+              h = document.createElement('input');
+              h.type = 'hidden'; h.name = 'hero_existing_src';
+              btn.closest('.rowset').appendChild(h);
+            }
+            h.value = url;
+            document.getElementById('hero-pick-status').textContent = '✓ ' + url.split('/').slice(-2).join('/');
+          } else if (target === 'plate' && idx != null) {
+            const wrap = btn.closest('.rowset');
+            const existing = wrap.querySelectorAll('input[name="plate_existing_src[]"]')[0];
+            if (existing) existing.value = url;
+            const label = wrap.querySelector('.plate-pick-status');
+            if (label) label.textContent = '✓ ' + url.split('/').slice(-2).join('/');
+          }
+        },
+      });
+    });
+  });
+})();
+
 // Layout editor — up/down reordering
 document.querySelectorAll('.section-up').forEach(btn => {
   btn.addEventListener('click', () => {

@@ -19,6 +19,9 @@ RedirectMatch 404 /admin/lib/.*
 RedirectMatch 404 /admin/views/.*
 RedirectMatch 404 /admin/\.lockout.*
 
+# Block direct access to bootstrap files (loaded by API endpoints only)
+RedirectMatch 404 /admin/api/_.*
+
 # No caching of admin pages
 <IfModule mod_headers.c>
   Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"

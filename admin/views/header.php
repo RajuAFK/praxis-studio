@@ -71,8 +71,10 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: v
 <div class="bar">
   <h1>Praxivision · CMS</h1>
   <div class="right">
-    <a href="/admin/dashboard">Dashboard</a> ·
-    <a href="/admin/new">New case study</a> ·
+    <a href="/admin/dashboard">Case studies</a> ·
+    <a href="/admin/upload">Upload content</a> ·
+    <a href="/admin/private">Private pages</a> ·
+    <a href="/admin/private-library">Library</a> ·
     <a href="/admin/logout">Log out</a>
   </div>
 </div>

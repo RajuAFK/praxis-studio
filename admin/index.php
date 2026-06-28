@@ -10,6 +10,7 @@ require __DIR__ . '/lib/csrf.php';
 require __DIR__ . '/lib/github.php';
 require __DIR__ . '/lib/image.php';
 require __DIR__ . '/lib/slug.php';
+require __DIR__ . '/lib/private-store.php';
 
 session_set_cookie_params([
     'lifetime' => 0,
@@ -71,6 +72,24 @@ switch (true) {
 
     case $route === 'publishing':
         admin_publishing_view($config);
+        break;
+
+    case $route === 'upload':
+        admin_upload_view($config);
+        break;
+
+    /* ----- private pages ----- */
+    case $route === 'private':
+        admin_private_list($config);
+        break;
+    case $route === 'private-new':
+        admin_private_edit_view($config, null);
+        break;
+    case preg_match('#^private-edit/(\d+)$#', $route, $m):
+        admin_private_edit_view($config, (int)$m[1]);
+        break;
+    case $route === 'private-library':
+        admin_private_library_view($config);
         break;
 
     default:
@@ -368,6 +387,41 @@ function admin_publishing_view(array $config): void {
     $slug = $_SESSION['just_published_slug'] ?? null;
     include __DIR__ . '/views/header.php';
     include __DIR__ . '/views/publishing.php';
+    include __DIR__ . '/views/footer.php';
+}
+
+function admin_upload_view(array $config): void {
+    include __DIR__ . '/views/header.php';
+    include __DIR__ . '/views/upload.php';
+    include __DIR__ . '/views/footer.php';
+}
+
+/* ----- private page handlers ----- */
+
+function admin_private_list(array $config): void {
+    $pages   = pp_pages_all($config);
+    $library = pp_library_all($config);
+    // sort by updated_at desc
+    usort($pages, fn($a, $b) => ((int)($b['updated_at'] ?? 0)) <=> ((int)($a['updated_at'] ?? 0)));
+    include __DIR__ . '/views/header.php';
+    include __DIR__ . '/views/private.php';
+    include __DIR__ . '/views/footer.php';
+}
+
+function admin_private_edit_view(array $config, ?int $id): void {
+    $page = $id ? pp_pages_find_id($config, $id) : null;
+    if ($id && !$page) { http_response_code(404); echo 'Not found'; exit; }
+    $library = pp_library_all($config);
+    include __DIR__ . '/views/header.php';
+    include __DIR__ . '/views/private-edit.php';
+    include __DIR__ . '/views/footer.php';
+}
+
+function admin_private_library_view(array $config): void {
+    $items = pp_library_all($config);
+    usort($items, fn($a, $b) => ((int)($b['created_at'] ?? 0)) <=> ((int)($a['created_at'] ?? 0)));
+    include __DIR__ . '/views/header.php';
+    include __DIR__ . '/views/private-library.php';
     include __DIR__ . '/views/footer.php';
 }
 
