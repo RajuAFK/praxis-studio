@@ -25,3 +25,8 @@ Thumbs.db
 # via NEXT_PUBLIC_MEDIA_BASE; the local files are only used at build time
 # to enumerate works on the host running `next build`.
 /public/portfolio
+
+# Admin runtime config — contains GitHub PAT + bcrypt password hashes.
+# Lives only on the Hostinger server, never in git.
+/admin/config.php
+/admin/.lockout
