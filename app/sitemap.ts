@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllStudies } from "@/lib/case-studies";
+import { getPublishedStudies } from "@/lib/case-studies";
 import { getAllWorks } from "@/lib/portfolio";
 
 export const dynamic = "force-static";
@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/archive/`,        priority: 0.8, changeFrequency: "monthly", lastModified: now },
   ];
 
-  const studyPaths: MetadataRoute.Sitemap = getAllStudies().map((s) => ({
+  const studyPaths: MetadataRoute.Sitemap = getPublishedStudies().map((s) => ({
     url: `${BASE}/case-studies/${s.slug}/`,
     priority: 0.7,
     changeFrequency: "monthly",

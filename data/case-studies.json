@@ -1,8 +1,15 @@
 {
-  "version": 1,
+  "version": 2,
   "studies": [
     {
       "slug": "ttd-calendar",
+      "status": "published",
+      "sections": [
+        { "type": "job",     "visible": true },
+        { "type": "method",  "visible": true },
+        { "type": "plates",  "visible": true },
+        { "type": "outcome", "visible": true }
+      ],
       "client": "Tirumala Tirupati Devasthanams",
       "title": "TTD Calendar",
       "titleHead": "TTD",

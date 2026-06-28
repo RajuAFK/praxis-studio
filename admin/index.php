@@ -159,6 +159,14 @@ function admin_edit_view(array $config, ?string $slug): void {
 function admin_save(array $config, ?string $editingSlug): void {
     csrf_check();
 
+    // The form has two submit buttons:
+    //   <button name="_action" value="draft">Save draft</button>
+    //   <button name="_action" value="publish">Publish</button>
+    // Default to "draft" when neither was clicked (shouldn't happen with
+    // a normal form submit, but defensive).
+    $action = (string)($_POST['_action'] ?? 'draft');
+    $statusToWrite = ($action === 'publish') ? 'published' : 'draft';
+
     $title       = trim((string)($_POST['title'] ?? ''));
     $client      = trim((string)($_POST['client'] ?? ''));
     $titleHead   = trim((string)($_POST['titleHead'] ?? ''));
@@ -260,8 +268,34 @@ function admin_save(array $config, ?string $editingSlug): void {
         ];
     }
 
+    // Sections array — visibility + order from the layout editor (B-4).
+    // Falls back to the default order if the form didn't post any.
+    $sectionsTypes = (array)($_POST['section_type']    ?? []);
+    $sectionsVis   = (array)($_POST['section_visible'] ?? []);
+    $sectionVisLookup = [];
+    foreach ($sectionsVis as $t) { $sectionVisLookup[(string)$t] = true; }
+    $sections = [];
+    foreach ($sectionsTypes as $t) {
+        $t = (string)$t;
+        if (!in_array($t, ['job','method','plates','outcome'], true)) continue;
+        $sections[] = [
+            'type'    => $t,
+            'visible' => isset($sectionVisLookup[$t]),
+        ];
+    }
+    if (empty($sections)) {
+        $sections = [
+            ['type' => 'job',     'visible' => true],
+            ['type' => 'method',  'visible' => true],
+            ['type' => 'plates',  'visible' => true],
+            ['type' => 'outcome', 'visible' => true],
+        ];
+    }
+
     $record = [
         'slug'        => $slug,
+        'status'      => $statusToWrite,
+        'sections'    => $sections,
         'client'      => $client,
         'title'       => $title,
         'titleHead'   => $titleHead !== '' ? $titleHead : $title,
@@ -302,14 +336,16 @@ function admin_save(array $config, ?string $editingSlug): void {
         'studies' => $studies,
     ];
 
+    $verb = $statusToWrite === 'published' ? 'publish' : 'draft';
     $msg = $found
-        ? "cms: update case study {$client} {$year}"
-        : "cms: add case study {$client} {$year}";
+        ? "cms: {$verb} case study {$client} {$year}"
+        : "cms: add case study {$client} {$year} ({$verb})";
 
     github_write_json($config, $newFile, $sha, $msg);
     github_dispatch_workflow($config);
 
-    $_SESSION['just_published_slug'] = $slug;
+    $_SESSION['just_published_slug']   = $slug;
+    $_SESSION['just_published_status'] = $statusToWrite;
     header('Location: /admin/publishing');
     exit;
 }

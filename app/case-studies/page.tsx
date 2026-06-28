@@ -5,7 +5,7 @@ import { ContactFooter } from "@/components/ContactFooter";
 import { VaultNav } from "@/components/VaultNav";
 import { PlateImage } from "@/components/PlateImage";
 import { VaultBrackets } from "@/components/VaultBrackets";
-import { getAllStudies } from "@/lib/case-studies";
+import { getPublishedStudies } from "@/lib/case-studies";
 
 export const metadata: Metadata = {
   title: "Case Studies",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default function CaseStudiesIndexPage() {
-  const STUDIES = getAllStudies();
+  const STUDIES = getPublishedStudies();
   return (
     <main style={{ position: "relative" }}>
       <VaultNav active="Case Studies" />

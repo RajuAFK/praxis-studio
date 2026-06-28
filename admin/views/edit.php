@@ -22,9 +22,34 @@ $s = $study ?? [
 ];
 $flash = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_error']);
+
+// Layout editor — section visibility + order. Stored on the record as
+// sections[] = [{type, visible}]. Defaults applied if missing.
+$SECTION_LABELS = [
+    'job'     => 'The job · specs grid',
+    'method'  => 'Method · phases',
+    'plates'  => 'Plates · image grid',
+    'outcome' => 'Outcome',
+];
+$currentSections = $s['sections'] ?? [
+    ['type' => 'job',     'visible' => true],
+    ['type' => 'method',  'visible' => true],
+    ['type' => 'plates',  'visible' => true],
+    ['type' => 'outcome', 'visible' => true],
+];
+$currentStatus = $s['status'] ?? 'draft';
 ?>
 
-<h2><?= $isNew ? 'New case study' : 'Edit: ' . htmlspecialchars($s['title']) ?></h2>
+<h2>
+  <?= $isNew ? 'New case study' : 'Edit: ' . htmlspecialchars($s['title']) ?>
+  <?php if (!$isNew): ?>
+    <span style="margin-left: 10px; font-size: 11px; letter-spacing: 0.2em; padding: 3px 8px; border-radius: 3px;
+      background: <?= $currentStatus === 'published' ? 'var(--ok)' : '#888' ?>;
+      color: #fff; vertical-align: middle;">
+      <?= strtoupper($currentStatus) ?>
+    </span>
+  <?php endif; ?>
+</h2>
 
 <?php if ($flash): ?>
   <div class="note error" style="margin-bottom: 16px;"><?= htmlspecialchars($flash) ?></div>
@@ -212,18 +237,65 @@ unset($_SESSION['flash_error']);
     <textarea name="outcomeLede"><?= htmlspecialchars($s['outcomeLede'] ?? '') ?></textarea>
   </div>
 
+  <h3>Page layout <span class="muted">(toggle and reorder sections)</span></h3>
+  <div class="note" style="margin-bottom: 12px;">
+    Hero (title + lede + cover image) is always shown first.
+    Use the up/down buttons to reorder these four sections; uncheck to hide one entirely.
+  </div>
+  <div id="sections" class="rowset">
+    <?php foreach ($currentSections as $sec):
+      $type = $sec['type'];
+      if (!isset($SECTION_LABELS[$type])) continue;
+      $visible = !empty($sec['visible']);
+    ?>
+      <div class="section-row" data-type="<?= htmlspecialchars($type) ?>"
+           style="display: grid; grid-template-columns: auto 1fr auto auto; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule);">
+        <input type="hidden" name="section_type[]" value="<?= htmlspecialchars($type) ?>">
+        <label style="display: flex; align-items: center; gap: 8px; margin: 0;">
+          <input type="checkbox" name="section_visible[]" value="<?= htmlspecialchars($type) ?>" <?= $visible ? 'checked' : '' ?>>
+          <span class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Visible</span>
+        </label>
+        <div style="font-weight: 500;"><?= htmlspecialchars($SECTION_LABELS[$type]) ?></div>
+        <button type="button" class="btn secondary section-up"   style="padding: 4px 10px;">↑</button>
+        <button type="button" class="btn secondary section-down" style="padding: 4px 10px;">↓</button>
+      </div>
+    <?php endforeach; ?>
+  </div>
+
   <div class="actions">
-    <button class="btn ember" type="submit">
-      <?= $isNew ? 'Publish' : 'Update' ?> &nbsp;→
+    <button class="btn secondary" type="submit" name="_action" value="draft">
+      Save as draft
+    </button>
+    <button class="btn ember" type="submit" name="_action" value="publish">
+      <?= $currentStatus === 'published' ? 'Update (stay published)' : 'Publish' ?> &nbsp;→
     </button>
     <a class="btn secondary" href="/admin/dashboard">Cancel</a>
   </div>
   <p class="muted" style="margin-top: 10px;">
-    Publishing commits to GitHub and triggers a rebuild. Live in ~2 minutes.
+    Both actions commit to GitHub and trigger a rebuild. Drafts get a noindex preview URL
+    that isn't listed publicly. Publishing makes it live and indexable. ~2 minutes either way.
   </p>
 </form>
 
 <script>
+// Layout editor — up/down reordering
+document.querySelectorAll('.section-up').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const row = btn.closest('.section-row');
+    if (row && row.previousElementSibling && row.previousElementSibling.classList.contains('section-row')) {
+      row.parentNode.insertBefore(row, row.previousElementSibling);
+    }
+  });
+});
+document.querySelectorAll('.section-down').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const row = btn.closest('.section-row');
+    if (row && row.nextElementSibling && row.nextElementSibling.classList.contains('section-row')) {
+      row.parentNode.insertBefore(row.nextElementSibling, row);
+    }
+  });
+});
+
 function addRow(containerId, rowClass, ...names) {
   const el = document.getElementById(containerId);
   const row = document.createElement('div');

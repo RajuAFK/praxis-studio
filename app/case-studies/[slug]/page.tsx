@@ -10,9 +10,29 @@ import { CreativeWorkSchema } from "@/components/SchemaOrg";
 import {
   getAllStudies,
   getStudyBySlug,
+  getSections,
+  isPublished,
   type CaseStudy,
+  type CaseStudySectionType,
 } from "@/lib/case-studies";
 
+/** Skip rendering a section if its underlying record has nothing to show. */
+function hasSectionContent(study: CaseStudy, type: CaseStudySectionType): boolean {
+  switch (type) {
+    case "job":     return Boolean(study.jobSummary) || study.specs.length > 0;
+    case "method":  return study.phases.length > 0;
+    case "plates":  return study.plates.length > 0;
+    case "outcome": return Boolean(study.outcomeLede);
+  }
+}
+
+/**
+ * Generate static pages for EVERY case study (drafts included).
+ * Drafts get rendered with a noindex meta + a visible "DRAFT" banner so the
+ * URL is shareable for preview but excluded from search engines and the
+ * public listing/sitemap. Publish flips status — the page re-renders without
+ * the banner on the next deploy.
+ */
 export function generateStaticParams() {
   return getAllStudies().map((s) => ({ slug: s.slug }));
 }
@@ -27,23 +47,32 @@ export async function generateMetadata({
   const { slug } = await params;
   const study = getStudyBySlug(slug);
   if (!study) return { title: "Case Study" };
+  const published = isPublished(study);
   return {
-    title: `${study.title} — Case Study`,
+    title: published
+      ? `${study.title} — Case Study`
+      : `[DRAFT] ${study.title} — Case Study`,
     description: study.summary,
-    openGraph: {
-      title: `${study.title} — ${study.client}`,
-      description: study.summary,
-      type: "article",
-      url: `https://praxivision.com/case-studies/${study.slug}/`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${study.title} — ${study.client}`,
-      description: study.summary,
-    },
-    alternates: {
-      canonical: `https://praxivision.com/case-studies/${study.slug}/`,
-    },
+    // Drafts must not be indexed — they're shareable preview URLs only.
+    robots: published ? undefined : { index: false, follow: false, nocache: true },
+    openGraph: published
+      ? {
+          title: `${study.title} — ${study.client}`,
+          description: study.summary,
+          type: "article",
+          url: `https://praxivision.com/case-studies/${study.slug}/`,
+        }
+      : undefined,
+    twitter: published
+      ? {
+          card: "summary_large_image",
+          title: `${study.title} — ${study.client}`,
+          description: study.summary,
+        }
+      : undefined,
+    alternates: published
+      ? { canonical: `https://praxivision.com/case-studies/${study.slug}/` }
+      : undefined,
   };
 }
 
@@ -59,10 +88,46 @@ export default async function CaseStudyDetailPage({
 }
 
 function Detail({ study }: { study: CaseStudy }) {
+  // Pull section ordering from the record; default to the legacy order if missing.
+  const sectionsOrdered = getSections(study)
+    .filter((s) => s.visible)
+    .filter((s) => hasSectionContent(study, s.type));
+  // Each section needs a "01 / 02 / …" running label; build the lookup once.
+  const numbering = new Map<CaseStudySectionType, string>();
+  sectionsOrdered.forEach((s, i) => {
+    numbering.set(s.type, String(i + 1).padStart(2, "0"));
+  });
+  const n = (t: CaseStudySectionType) => numbering.get(t) ?? "—";
+
+  const draft = !isPublished(study);
+
   return (
     <main style={{ position: "relative" }}>
-      <CreativeWorkSchema study={study} />
+      {/* CreativeWork schema only for published — drafts shouldn't claim entity status */}
+      {!draft && <CreativeWorkSchema study={study} />}
       <VaultNav active="Case Studies" />
+
+      {draft && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 100,
+            background: "var(--vault-ember)",
+            color: "#000",
+            padding: "8px 16px",
+            textAlign: "center",
+            fontFamily: "var(--font-mono), ui-monospace, monospace",
+            fontSize: 11,
+            letterSpacing: "0.28em",
+            fontWeight: 600,
+          }}
+        >
+          ● DRAFT PREVIEW · NOT PUBLICLY LISTED · NOINDEX
+        </div>
+      )}
 
       {/* HERO */}
       <section
@@ -130,6 +195,7 @@ function Detail({ study }: { study: CaseStudy }) {
       </section>
 
       {/* SPECS */}
+      {numbering.has("job") && (
       <section
         className="vault-pad"
         style={{
@@ -147,7 +213,7 @@ function Detail({ study }: { study: CaseStudy }) {
               color: "var(--vault-ember)",
             }}
           >
-            01 — THE JOB
+            {n("job")} — THE JOB
           </div>
           <div>
             <p
@@ -196,8 +262,10 @@ function Detail({ study }: { study: CaseStudy }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* PHASES */}
+      {numbering.has("method") && (
       <section
         className="vault-pad"
         style={{
@@ -215,7 +283,7 @@ function Detail({ study }: { study: CaseStudy }) {
               color: "var(--vault-ember)",
             }}
           >
-            02 — METHOD
+            {n("method")} — METHOD
           </div>
           <h2 className="h-display-m" style={{ margin: 0 }}>
             {study.phasesHeader}
@@ -274,9 +342,10 @@ function Detail({ study }: { study: CaseStudy }) {
           ))}
         </div>
       </section>
+      )}
 
       {/* PLATE GRID */}
-      {study.plates.length > 0 && (
+      {numbering.has("plates") && (
         <section
           className="vault-pad"
           style={{
@@ -294,7 +363,7 @@ function Detail({ study }: { study: CaseStudy }) {
                 color: "var(--vault-ember)",
               }}
             >
-              03 — PLATES
+              {n("plates")} — PLATES
             </div>
             <div>
               <h2 className="h-display-m" style={{ margin: 0 }}>
@@ -352,6 +421,7 @@ function Detail({ study }: { study: CaseStudy }) {
       )}
 
       {/* OUTCOME */}
+      {numbering.has("outcome") && (
       <section
         className="vault-pad"
         style={{
@@ -369,7 +439,7 @@ function Detail({ study }: { study: CaseStudy }) {
               color: "var(--vault-ember)",
             }}
           >
-            04 — OUTCOME
+            {n("outcome")} — OUTCOME
           </div>
           <div>
             <p
@@ -386,27 +456,30 @@ function Detail({ study }: { study: CaseStudy }) {
             </p>
           </div>
         </div>
+      </section>
+      )}
 
-        <div
+      {/* Back to case studies — always shown, decoupled from any section */}
+      <section
+        className="vault-pad"
+        style={{
+          paddingTop: 32,
+          paddingBottom: 96,
+          borderTop: "1px solid var(--vault-rule)",
+        }}
+      >
+        <Link
+          href="/case-studies"
+          className="font-mono"
           style={{
-            marginTop: 64,
-            paddingTop: 24,
-            borderTop: "1px solid var(--vault-rule)",
+            color: "var(--vault-ember)",
+            textDecoration: "none",
+            fontSize: 11,
+            letterSpacing: "0.28em",
           }}
         >
-          <Link
-            href="/case-studies"
-            className="font-mono"
-            style={{
-              color: "var(--vault-ember)",
-              textDecoration: "none",
-              fontSize: 11,
-              letterSpacing: "0.28em",
-            }}
-          >
-            ← BACK TO CASE STUDIES
-          </Link>
-        </div>
+          ← BACK TO CASE STUDIES
+        </Link>
       </section>
 
       <ContactFooter />

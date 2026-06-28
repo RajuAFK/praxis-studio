@@ -29,8 +29,35 @@ export interface CaseStudyPlate {
   position?: string;
 }
 
+export type CaseStudyStatus = "draft" | "published";
+
+/**
+ * Toggleable / reorderable section types on the case-study detail page.
+ * The hero is always rendered first and always visible — it's not part of
+ * the toggleable set. Everything else can be hidden or reordered through
+ * the admin layout editor.
+ */
+export type CaseStudySectionType = "job" | "method" | "plates" | "outcome";
+
+export interface CaseStudySection {
+  type: CaseStudySectionType;
+  visible: boolean;
+}
+
+/** Default section order applied when a record omits the field. */
+export const DEFAULT_SECTIONS: CaseStudySection[] = [
+  { type: "job",     visible: true },
+  { type: "method",  visible: true },
+  { type: "plates",  visible: true },
+  { type: "outcome", visible: true },
+];
+
 export interface CaseStudy {
   slug: string;
+  /** Defaults to "published" when missing (back-compat with v1 records). */
+  status?: CaseStudyStatus;
+  /** Defaults to DEFAULT_SECTIONS when missing. */
+  sections?: CaseStudySection[];
   client: string;
   title: string;
   titleHead: string;
@@ -65,8 +92,21 @@ export function getAllStudies(): CaseStudy[] {
   return FILE.studies;
 }
 
+/** Anything visible to the public — listing, sitemap, static-params all use this. */
+export function getPublishedStudies(): CaseStudy[] {
+  return FILE.studies.filter((s) => (s.status ?? "published") === "published");
+}
+
 export function getStudyBySlug(slug: string): CaseStudy | undefined {
   return FILE.studies.find((s) => s.slug === slug);
+}
+
+export function isPublished(s: CaseStudy): boolean {
+  return (s.status ?? "published") === "published";
+}
+
+export function getSections(s: CaseStudy): CaseStudySection[] {
+  return s.sections && s.sections.length > 0 ? s.sections : DEFAULT_SECTIONS;
 }
 
 export function getStudySlugs(): string[] {
