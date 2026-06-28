@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "manifest": "node scripts/generate-portfolio-manifest.mjs",
     "build": "next build && node scripts/post-build.mjs",
     "start": "next start",
     "lint": "next lint",

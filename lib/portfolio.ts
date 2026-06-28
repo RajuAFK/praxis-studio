@@ -372,16 +372,29 @@ let cache: Work[] | null = null;
 
 export function getAllWorks(): Work[] {
   if (cache) return cache;
-  if (!fs.existsSync(ROOT)) {
-    cache = [];
+  if (fs.existsSync(ROOT)) {
+    cache = [
+      ...buildPhotography(),
+      ...buildVrs(),
+      ...buildGigapans(),
+      ...build3D(),
+    ];
     return cache;
   }
-  cache = [
-    ...buildPhotography(),
-    ...buildVrs(),
-    ...buildGigapans(),
-    ...build3D(),
-  ];
+  // Fallback: committed manifest. Used by CI builds where the studio's
+  // local /public/portfolio junction does not exist. Regenerate the manifest
+  // locally with `npm run manifest` whenever the studio's media tree changes.
+  try {
+    const manifestPath = path.join(process.cwd(), "data", "portfolio-manifest.json");
+    if (fs.existsSync(manifestPath)) {
+      const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+      cache = Array.isArray(parsed.works) ? (parsed.works as Work[]) : [];
+      return cache;
+    }
+  } catch {
+    // fall through
+  }
+  cache = [];
   return cache;
 }
 
