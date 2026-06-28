@@ -20,10 +20,47 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Praxis Studio — Industrial Photography · Hyderabad · Est. 1992",
+  metadataBase: new URL("https://praxivision.com"),
+  title: {
+    default:
+      "Praxivision — Heritage Documentation, 360° Tours, Photogrammetry & Gaussian Splatting",
+    template: "%s · Praxivision",
+  },
   description:
-    "A department of Praxivision Pvt Ltd. Industrial photography, gigapixel imagery, 360° tours, photogrammetry, and gaussian splat capture.",
-  metadataBase: new URL("https://praxis.photo"),
+    "Digital documentation studio for museums and heritage organizations. Photogrammetry, gaussian splats, 360° virtual tours, gigapixel imagery, and archival photography — Hyderabad, since 1992.",
+  applicationName: "Praxivision",
+  authors: [{ name: "Praxivision Private Limited" }],
+  keywords: [
+    "heritage documentation",
+    "museum 3d scanning",
+    "gaussian splatting",
+    "photogrammetry",
+    "360 virtual tour",
+    "gigapixel imagery",
+    "industrial photography",
+    "Hyderabad",
+    "cultural heritage",
+  ],
+  alternates: {
+    canonical: "https://praxivision.com/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Praxivision",
+    title:
+      "Praxivision — Heritage Documentation Studio · Hyderabad · Since 1992",
+    description:
+      "Photogrammetry, gaussian splatting, 360° virtual tours, gigapixel imagery, and archival photography for museums and heritage organizations.",
+    url: "https://praxivision.com/",
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Praxivision — Heritage Documentation Studio",
+    description:
+      "Photogrammetry, gaussian splats, 360° virtual tours, gigapixel, photography for museums and cultural institutions.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
+import Image from "next/image";
 import { SISTERS, type Sister } from "@/lib/sisters";
 import { Accent } from "./Accent";
-import { VaultPlate } from "./VaultPlate";
+import { VaultBrackets } from "./VaultBrackets";
 
 export function PraxivisionFamily({
   current = "studio",
@@ -83,14 +84,50 @@ export function PraxivisionFamily({
                 </span>
               </div>
 
-              <VaultPlate
-                plateId={s.plateId}
-                plateNo={`PV.0${i + 1}`}
-                caption={isCurrent ? "● YOU ARE HERE" : "VISIT →"}
-                alt={`${s.name} — ${s.tagline}`}
-                position={s.position}
-                style={{ aspectRatio: "4 / 3", width: "100%" }}
-              />
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  aspectRatio: "4 / 3",
+                  background: isCurrent
+                    ? "rgba(217,106,42,0.04)"
+                    : "rgba(255,255,255,0.015)",
+                  border: "1px solid var(--vault-rule)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "14% 18%",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                  <Image
+                    src={s.logo}
+                    alt={`${s.name} logo`}
+                    fill
+                    sizes="(max-width: 768px) 90vw, 28vw"
+                    style={{ objectFit: "contain" }}
+                  />
+                </div>
+                <VaultBrackets />
+                <div
+                  className="font-mono"
+                  style={{
+                    position: "absolute",
+                    bottom: 10,
+                    left: 12,
+                    right: 12,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 9,
+                    letterSpacing: "0.22em",
+                    color: "var(--vault-paper-dim)",
+                  }}
+                >
+                  <span style={{ color: "var(--vault-ember)" }}>PV.0{i + 1}</span>
+                  <span>{isCurrent ? "● YOU ARE HERE" : "VISIT →"}</span>
+                </div>
+              </div>
 
               <div
                 style={{
@@ -162,9 +199,13 @@ export function PraxivisionFamily({
                     />
                     THE STUDIO YOU&rsquo;RE IN
                   </span>
-                ) : (
+                ) : s.urlLabel ? (
                   <span className="vault-link" style={{ color: "var(--vault-paper)" }}>
                     {s.urlLabel} →
+                  </span>
+                ) : (
+                  <span style={{ color: "var(--vault-paper-dim)" }}>
+                    SISTER DEPARTMENT
                   </span>
                 )}
               </div>

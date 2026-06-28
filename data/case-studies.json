@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "studies": [
+    {
+      "slug": "ttd-calendar",
+      "client": "Tirumala Tirupati Devasthanams",
+      "title": "TTD Calendar",
+      "titleHead": "TTD",
+      "titleTail": "Calendar.",
+      "year": "2024",
+      "tag": "DEVOTIONAL · ANNUAL CALENDAR",
+      "instruments": "Medium format · Tethered capture · 16-bit print masters",
+      "summary": "Twelve plates, one cover, and a set of regional language reprints — produced under temple protocol and delivered to press inside seven weeks.",
+      "lede": "An annual calendar for Tirumala Tirupati Devasthanams — twelve principal sevas of the hill shrine, photographed under temple protocol and delivered for regional-language reprint.",
+      "kicker": "01 / 01 · DEVOTIONAL · ANNUAL CALENDAR · 2024",
+      "hero": {
+        "plateId": "ttd-cal-hero",
+        "thumbPlateId": "ttd-calendar-cover",
+        "alt": "TTD Calendar cover",
+        "position": "50% 50%",
+        "frameLabel": "TTD CALENDAR · COVER",
+        "frameCode": "PL.01",
+        "frameExposure": "TIRUMALA · 2024",
+        "frameScale": "cover"
+      },
+      "jobSummary": "A calendar that goes into a vast number of homes — photographed in a temple that does not permit a strobe.",
+      "specs": [
+        ["Client", "Tirumala Tirupati Devasthanams"],
+        ["Year", "2024"],
+        ["Scope", "12 plates + cover · annual calendar"],
+        ["Format", "Medium format · tethered"],
+        ["Delivery", "16-bit TIFF · press-ready CMYK · regional language reprints"]
+      ],
+      "phasesHeader": "Four phases,",
+      "phasesHeaderAccent": "on site.",
+      "phases": [
+        {
+          "n": "I",
+          "tail": "Brief",
+          "body": "Sittings with the TTD publications board. The board set the theme — the twelve principal sevas of Tirumala — and supplied a checklist of pratimas, ornaments, and processional artefacts to be photographed in situ."
+        },
+        {
+          "n": "II",
+          "tail": "Access",
+          "body": "Temple protocol required capture inside narrow windows between sevas. Crews entered without shoes, electronics carried in cotton bags, and every lighting modifier white-balanced against the temple's own brass lamps."
+        },
+        {
+          "n": "III",
+          "tail": "Capture",
+          "body": "Multiple weeks on site at Tirumala. Tethered medium-format capture. Continuous lighting only — no strobes inside the sanctum."
+        },
+        {
+          "n": "IV",
+          "tail": "Edit",
+          "body": "Selections reviewed by the publications board against the original checklist. Two rounds of feedback, sign-off on a printed contact sheet, then 16-bit masters handed to press with embedded ICC profiles for the chosen mills."
+        }
+      ],
+      "platesHeader": "Selected",
+      "platesHeaderAccent": "spreads.",
+      "platesIntro": "Six of the twelve finished plates. The full set appears in the physical calendar; reduced-resolution proofs are reproduced here for reference.",
+      "plates": [
+        { "plateId": "ttd-cal-01", "label": "PL.01 · COVER",        "caption": "TIRUMALA",        "position": "50% 50%" },
+        { "plateId": "ttd-cal-02", "label": "PL.02 · PROCESSIONAL", "caption": "MORNING SEVA",    "position": "50% 45%" },
+        { "plateId": "ttd-cal-03", "label": "PL.03 · OFFERING",     "caption": "FLORAL OFFERING", "position": "50% 55%" },
+        { "plateId": "ttd-cal-04", "label": "PL.04 · ARCHANA",      "caption": "DAILY RITE",      "position": "55% 50%" },
+        { "plateId": "ttd-cal-05", "label": "PL.05 · KALYANOTSAVAM","caption": "WEDDING RITE",    "position": "45% 50%" },
+        { "plateId": "ttd-cal-06", "label": "PL.06 · UNJAL SEVA",   "caption": "SWING RITE",      "position": "50% 60%" }
+      ],
+      "outcomeLede": "Pressed in multiple regional languages. Shipped to devotees, dignitaries, and the Tirumala archive."
+    }
+  ]
+}

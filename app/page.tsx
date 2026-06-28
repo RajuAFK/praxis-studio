@@ -1,9 +1,11 @@
+import Image from "next/image";
 import { Accent } from "@/components/Accent";
 import { Capabilities } from "@/components/Capabilities";
 import { ClientList } from "@/components/ClientList";
 import { ContactFooter } from "@/components/ContactFooter";
 import { HeroSwitcher } from "@/components/HeroSwitcher";
 import { VaultNav } from "@/components/VaultNav";
+import { OrganizationSchema, ServiceSchemas } from "@/components/SchemaOrg";
 
 const STATS: [string, string][] = [
   ["33", "YEARS ON ASSIGNMENT"],
@@ -14,9 +16,9 @@ const STATS: [string, string][] = [
 /* Ordered left → middle → right so Praxis Studio sits as the central
    node, with TIV branching off to its left and P3D to its right. */
 const TREE = [
-  { key: "tiv",    name: "Tour It Virtually",     tail: "Virtually",   year: "2017", tag: "HERITAGE",    urlLabel: "touritvirtually.com", current: false },
-  { key: "studio", name: "Praxis Studio",         tail: "Studio",      year: "1992", tag: "PHOTOGRAPHY", urlLabel: null,                   current: true  },
-  { key: "p3d",    name: "Praxis 3D Informatics", tail: "Informatics", year: "2024", tag: "VOLUMETRICS", urlLabel: "praxis3d.in",          current: false },
+  { key: "tiv",    name: "Tour It Virtually",     tail: "Virtually",   year: "2017", tag: "HERITAGE",    urlLabel: "touritvirtually.com" as string | null, current: false, logo: "/logos/tiv.png"           },
+  { key: "studio", name: "Praxis Studio",         tail: "Studio",      year: "1992", tag: "PHOTOGRAPHY", urlLabel: null                  as string | null, current: true,  logo: "/logos/praxis-studio.png" },
+  { key: "p3d",    name: "Praxis 3D Informatics", tail: "Informatics", year: "2024", tag: "VOLUMETRICS", urlLabel: null                  as string | null, current: false, logo: "/logos/praxis-3d.png"     },
 ];
 
 /* Fixed pixel width for each sister box so the row is perfectly symmetrical
@@ -27,6 +29,8 @@ const HORIZ_CONNECTOR_W = 48;
 export default function HomePage() {
   return (
     <main style={{ position: "relative" }}>
+      <OrganizationSchema />
+      <ServiceSchemas />
       <VaultNav active="Work" />
       <HeroSwitcher />
 
@@ -263,18 +267,19 @@ function ParentBox({ compact }: { compact?: boolean } = {}) {
       </div>
       <div
         style={{
-          marginTop: 12,
-          fontWeight: 300,
-          fontSize: compact ? 28 : 44,
-          letterSpacing: "-0.03em",
-          lineHeight: 1,
-          color: "var(--vault-paper)",
+          position: "relative",
+          marginTop: 14,
+          height: compact ? 38 : 56,
+          width: "100%",
         }}
       >
-        Praxivision{" "}
-        <em style={{ fontStyle: "italic", color: "var(--vault-ember)" }}>
-          Pvt Ltd.
-        </em>
+        <Image
+          src="/logos/praxivision.png"
+          alt="Praxivision Pvt Ltd"
+          fill
+          sizes={compact ? "260px" : "440px"}
+          style={{ objectFit: "contain", objectPosition: "center" }}
+        />
       </div>
       {!compact && (
         <div
@@ -321,15 +326,28 @@ function SisterBox({ s }: { s: (typeof TREE)[number] }) {
       </div>
       <div
         style={{
-          marginTop: 12,
+          position: "relative",
+          marginTop: 14,
+          height: 44,
+          width: "100%",
+        }}
+      >
+        <Image
+          src={s.logo}
+          alt={`${s.name} logo`}
+          fill
+          sizes="200px"
+          style={{ objectFit: "contain", objectPosition: "center" }}
+        />
+      </div>
+      <div
+        style={{
+          marginTop: 10,
           fontWeight: 300,
-          fontSize: 22,
-          letterSpacing: "-0.02em",
-          lineHeight: 1.1,
-          color: "var(--vault-paper)",
-          // Reserve space so all three boxes are the same height even when
-          // one name wraps to two lines and another doesn't.
-          minHeight: "2.4em",
+          fontSize: 16,
+          letterSpacing: "-0.015em",
+          lineHeight: 1.2,
+          color: "var(--vault-paper-dim)",
         }}
       >
         {s.name.replace(s.tail, "")}
@@ -376,7 +394,7 @@ function SisterBox({ s }: { s: (typeof TREE)[number] }) {
           />
           YOU ARE HERE
         </div>
-      ) : (
+      ) : s.urlLabel ? (
         <div
           className="font-mono"
           style={{
@@ -388,6 +406,18 @@ function SisterBox({ s }: { s: (typeof TREE)[number] }) {
           <span className="vault-link" style={{ color: "var(--vault-paper)" }}>
             {s.urlLabel} →
           </span>
+        </div>
+      ) : (
+        <div
+          className="font-mono"
+          style={{
+            marginTop: 10,
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            color: "var(--vault-paper-dim)",
+          }}
+        >
+          SISTER
         </div>
       )}
     </div>

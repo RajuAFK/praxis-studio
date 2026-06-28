@@ -1,0 +1,76 @@
+name: cms-rebuild
+
+# Builds the static site and force-pushes the `out/` folder to the `deploy`
+# branch. Hostinger's webhook then pulls `deploy` into public_html/.
+#
+# Triggers:
+#   - The PHP admin posts to /actions/workflows/cms-rebuild.yml/dispatches
+#     after committing a case-studies.json change.
+#   - Pushing to main with code or content changes auto-rebuilds too — handy
+#     for engineering edits made outside the admin.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "data/**"
+      - "public/**"
+      - "scripts/**"
+      - "next.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - "postcss.config.js"
+      - "tailwind.config.ts"
+
+concurrency:
+  group: cms-rebuild
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      NEXT_PUBLIC_R2_BASE: https://pub-b6df9c86ce26430caf9d07b91b02796f.r2.dev
+      NEXT_PUBLIC_MEDIA_BASE: https://pub-b6df9c86ce26430caf9d07b91b02796f.r2.dev
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build (static export)
+        run: npm run build
+
+      - name: Copy .htaccess into out/
+        run: cp public/.htaccess out/.htaccess
+
+      - name: Publish out/ to deploy branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cd out
+          git init -q
+          git config user.email "actions@github.com"
+          git config user.name  "github-actions"
+          git checkout -q -b deploy
+          git add -A
+          git commit -q -m "deploy: $(date -u +%Y-%m-%dT%H:%M:%SZ) (run ${{ github.run_id }})"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" deploy

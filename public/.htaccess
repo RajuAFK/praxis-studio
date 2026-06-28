@@ -4,6 +4,14 @@ RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !=https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Canonical host — 301 praxis.photo (and any www. variant) to praxivision.com
+RewriteCond %{HTTP_HOST} ^(www\.)?praxis\.photo$ [NC]
+RewriteRule ^ https://praxivision.com%{REQUEST_URI} [L,R=301]
+
+# Strip www. on the canonical host
+RewriteCond %{HTTP_HOST} ^www\.praxivision\.com$ [NC]
+RewriteRule ^ https://praxivision.com%{REQUEST_URI} [L,R=301]
+
 # Map clean URLs to their .html files (Next static export)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f

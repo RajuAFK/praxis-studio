@@ -11,10 +11,11 @@ const ADDRESS = [
 ];
 
 const INDEX = [
-  { label: "Work",    href: "/" },
-  { label: "Archive", href: "/archive" },
-  { label: "Studio",  href: "/studio" },
-  { label: "Contact", href: "#contact" },
+  { label: "Work",         href: "/" },
+  { label: "Archive",      href: "/archive" },
+  { label: "Case Studies", href: "/case-studies" },
+  { label: "Studio",       href: "/studio" },
+  { label: "Contact",      href: "#contact" },
 ];
 
 /**
