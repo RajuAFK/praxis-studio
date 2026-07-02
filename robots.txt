@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /case-studies-media/
+
+Host: https://praxivision.com
+Sitemap: https://praxivision.com/sitemap.xml
