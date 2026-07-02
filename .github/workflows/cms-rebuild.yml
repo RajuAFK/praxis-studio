@@ -39,7 +39,11 @@ jobs:
     permissions:
       contents: write
     env:
-      NEXT_PUBLIC_R2_BASE: https://pub-b6df9c86ce26430caf9d07b91b02796f.r2.dev
+      # Mirrors the user's .env.local exactly: only MEDIA_BASE is set.
+      # NEXT_PUBLIC_R2_BASE is deliberately NOT set — the plates it controls
+      # (/plates/{id}.jpg via lib/r2.ts) ship as static files under public/plates/
+      # and are served from Hostinger, not from R2. Setting R2_BASE at build
+      # would redirect them to R2 URLs that don't exist and break every hero image.
       NEXT_PUBLIC_MEDIA_BASE: https://pub-b6df9c86ce26430caf9d07b91b02796f.r2.dev
     steps:
       - name: Checkout main
@@ -67,6 +71,10 @@ jobs:
           R2_BUCKET:      ${{ secrets.R2_BUCKET }}
           R2_LIST_KEY:    ${{ secrets.R2_LIST_KEY }}
           R2_LIST_SECRET: ${{ secrets.R2_LIST_SECRET }}
+          # Public base for URL emission in the manifest ONLY — scoped to
+          # this step so it doesn't leak into the Next.js build env
+          # (see the note on NEXT_PUBLIC_R2_BASE at the job level).
+          R2_PUBLIC_BASE: https://pub-b6df9c86ce26430caf9d07b91b02796f.r2.dev
         run: |
           if [ -n "$R2_ACCOUNT_ID" ] && [ -n "$R2_LIST_KEY" ]; then
             npm run manifest -- --r2
